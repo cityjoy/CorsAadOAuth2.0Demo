@@ -1,0 +1,95 @@
+﻿@{
+    ViewBag.Title = "主页";
+}
+
+<h3>ajax 跨域请求使用OAuth验证身份的WEBAPI 示例</h3>
+<input type="button"  value="获取api接口返回的结果" id="getresult"/>
+<div id="token">Access Token： @ViewBag.Token</div>
+
+<div >获取到的值：<div id="clientResult"></div></div>
+<script src="~/Scripts/jquery-1.7.1.min.js"></script>
+<script>
+    $(function () {
+
+            //GetClientCredentialsAccessToken();
+        $("#getresult").click(function () {
+            GetValues('@ViewBag.Token');
+        });
+
+      
+    });
+
+    //function GetClientCredentialsAccessToken() {
+    //    $("#clientResult").html("Requesting");
+    //    var clientId = "user007";
+    //    var clientSecret = "007go";
+    //    $("#clientResult").html(  "Basic " + Base64_Encode(clientId + ":" + clientSecret));
+    //    $.ajax({
+    //        url: "http://api.test.com/token",
+    //        type: "post",
+    //        data: { "grant_type": "client_credentials" },
+    //        dataType: "json",
+    //        headers: {
+    //            "Authorization": "Basic " + Base64_Encode(clientId + ":" + clientSecret)
+    //        },
+    //        success: function (data) {
+    //            alert(JSON.stringify(data));
+
+    //            var accessToken = data.access_token;
+    //            GetValues(accessToken);
+    //        },
+    //        error: function (data) {
+    //            alert("error: "+JSON.stringify(data));
+
+    //        }
+    //    });
+    //}
+
+
+    function GetValues(accessToken) {
+        $.ajax({
+            url: "http://api.test.com/api/Values",
+            dataType: "json",
+            type: "get",
+            beforeSend: function (xhr) {
+                jQuery.support.cors = true;
+                xhr.setRequestHeader("Authorization", "Bearer " + accessToken)
+            },
+            success: function (values) {
+                $("#clientResult").html(JSON.stringify(values));
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log(textStatus);
+            }
+        });
+    }
+    function Base64_Encode(str) {
+        var c1, c2, c3;
+        var base64EncodeChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+        var i = 0, len = str.length, string = '';
+
+        while (i < len) {
+            c1 = str.charCodeAt(i++) & 0xff;
+            if (i === len) {
+                string += base64EncodeChars.charAt(c1 >> 2);
+                string += base64EncodeChars.charAt((c1 & 0x3) << 4);
+                string += "==";
+                break;
+            }
+            c2 = str.charCodeAt(i++);
+            if (i === len) {
+                string += base64EncodeChars.charAt(c1 >> 2);
+                string += base64EncodeChars.charAt(((c1 & 0x3) << 4) | ((c2 & 0xF0) >> 4));
+                string += base64EncodeChars.charAt((c2 & 0xF) << 2);
+                string += "=";
+                break;
+            }
+            c3 = str.charCodeAt(i++);
+            string += base64EncodeChars.charAt(c1 >> 2);
+            string += base64EncodeChars.charAt(((c1 & 0x3) << 4) | ((c2 & 0xF0) >> 4));
+            string += base64EncodeChars.charAt(((c2 & 0xF) << 2) | ((c3 & 0xC0) >> 6));
+            string += base64EncodeChars.charAt(c3 & 0x3F);
+        }
+        return string;
+    }
+</script>
